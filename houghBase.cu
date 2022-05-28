@@ -108,6 +108,9 @@ __global__ void GPU_HoughTran (unsigned char *pic, int w, int h, int *acc, float
 int main (int argc, char **argv)
 {
   int i;
+  cudaEvent_t start, stop;
+  cudaEventCreate(&start);
+  cudaEventCreate(&stop);
 
   PGMImage inImg (argv[1]);
 
@@ -158,10 +161,14 @@ int main (int argc, char **argv)
   // execution configuration uses a 1-D grid of 1-D blocks, each made of 256 threads
   //1 thread por pixel
   int blockNum = ceil (w * h / 256);
+  cudaEventRecord(start);
   GPU_HoughTran <<< blockNum, 256 >>> (d_in, w, h, d_hough, rMax, rScale, d_Cos, d_Sin);
+  cudaEventRecord(stop);
 
   // get results from device
   cudaMemcpy (h_hough, d_hough, sizeof (int) * degreeBins * rBins, cudaMemcpyDeviceToHost);
+
+  cudaEventSynchronize(stop);
 
   // compare CPU and GPU results
   for (i = 0; i < degreeBins * rBins; i++)
@@ -169,9 +176,13 @@ int main (int argc, char **argv)
     if (cpuht[i] != h_hough[i])
       printf ("Calculation mismatch at : %i %i %i\n", i, cpuht[i], h_hough[i]);
   }
+  float g_elapsed = 0;
+  cudaEventElapsedTime(&g_elapsed, start, stop);
   printf("Done!\n");
 
-  // TODO clean-up
+  printf("Elapsed time global - %f ms.\n", g_elapsed);
+
+  // clean-up
   cudaFree(d_in);
   cudaFree(d_hough);
   cudaFree(d_Cos);

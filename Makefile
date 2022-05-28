@@ -5,3 +5,6 @@ houghBase:	houghBase.cu pgm.o
 
 pgm.o:	pgm.cpp
 	g++ -c pgm.cpp -o ./pgm.o
+
+clean:
+	rm houghBase pgm.o
