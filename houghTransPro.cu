@@ -89,7 +89,7 @@ __global__ void GPU_HoughTransPro(unsigned char *pic, int w, int h, int *acc, fl
   __shared__ int locAcc[degreeBins * rBins];
 
   int i;
-  // initializze local accumulator
+  // initialize local accumulator
   for (i = locID; i < degreeBins * rBins; i += blockDim.x)
     locAcc[i] = 0;
 
@@ -224,7 +224,8 @@ int main (int argc, char **argv)
   //comparacion de resultados CPU y GPU
   for (i = 0; i < degreeBins * rBins; i++)
   {
-    if (cpuht[i] != h_hough[i]) printf ("Calculation mismatch at : %i %i %i\n", i, cpuht[i], h_hough[i]);
+    if (cpuht[i] != h_hough[i] && (cpuht[i] - h_hough[i] > 1))
+      printf ("Calculation mismatch at : %i %i %i\n", i, cpuht[i], h_hough[i]);
   }
 
   //calculo de tiempo transcurrido
@@ -232,7 +233,7 @@ int main (int argc, char **argv)
   cudaEventElapsedTime(&cons_elapsed, start, stop);
   printf("Done!\n");
 
-  printf("Elapsed time constant - %f ms.\n", cons_elapsed);
+  printf("Elapsed time pro - %f ms.\n", cons_elapsed);
 
   //clean-up de variables y espacio en memoria
   cudaFree(d_in);
