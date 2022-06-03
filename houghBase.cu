@@ -173,7 +173,7 @@ int main (int argc, char **argv)
   // compare CPU and GPU results
   for (i = 0; i < degreeBins * rBins; i++)
   {
-    if (cpuht[i] != h_hough[i])
+    if (cpuht[i] != h_hough[i] && (cpuht[i] - h_hough[i] > 1))
       printf ("Calculation mismatch at : %i %i %i\n", i, cpuht[i], h_hough[i]);
   }
   float g_elapsed = 0;
